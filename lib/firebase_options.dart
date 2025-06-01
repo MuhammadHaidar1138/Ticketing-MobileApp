@@ -72,4 +72,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'ticketing-app-b359a.firebasestorage.app',
     iosBundleId: 'com.example.ticketingApp',
   );
+
 }
