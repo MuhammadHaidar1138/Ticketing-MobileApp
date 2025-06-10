@@ -6,8 +6,7 @@ import 'pages/ticket_list.dart'; // Buat file ini di folder 'pages'
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: 
-  DefaultFirebaseOptions.currentPlatform); 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -39,27 +38,29 @@ class OnboardingPage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 32), // Agak lebih besar
               Center(
                 child: Image.asset(
-                  'assets/images/image.png', // Pastikan ini benar
-                  width: 230,
-                  height: 331,
+                  'assets/images/image.png',
+                  width: 160, // Agak lebih besar
+                  height: 200, // Agak lebih besar
                   fit: BoxFit.contain,
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 28), // Agak lebih besar
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 26, // Agak lebih besar
+                ),
                 child: Container(
-                  padding: const EdgeInsets.all(24),
+                  padding: const EdgeInsets.all(22), // Agak lebih besar
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18), // Agak lebih besar
                     boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
-                        blurRadius: 10,
+                        blurRadius: 10, // Agak lebih besar
                         offset: Offset(0, 2),
                       ),
                     ],
@@ -69,24 +70,24 @@ class OnboardingPage extends StatelessWidget {
                       const Text(
                         'Ticketing App',
                         style: TextStyle(
-                          fontSize: 24,
+                          fontSize: 20, // Agak lebih besar
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 12), // Agak lebih besar
                       Text(
                         'Membantu anda untuk managemen pembelian Tiket agar lebih efisien',
                         textAlign: TextAlign.center,
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
+                          fontSize: 13, // Agak lebih besar
                           fontWeight: FontWeight.w400,
-                          height: 30 / 16, // Line height 30px
+                          height: 1.3,
                           letterSpacing: 0,
                           color: Colors.black54,
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 18), // Agak lebih besar
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -99,15 +100,27 @@ class OnboardingPage extends StatelessWidget {
                             );
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 0, 17, 255),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            backgroundColor: const Color.fromARGB(
+                              255,
+                              0,
+                              17,
+                              255,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 14, // Agak lebih besar
+                            ),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
+                              borderRadius: BorderRadius.circular(
+                                22,
+                              ), // Agak lebih besar
                             ),
                           ),
                           child: const Text(
                             'Get Started',
-                            style: TextStyle(fontSize: 18, color: Colors.white),
+                            style: TextStyle(
+                              fontSize: 15, // Agak lebih besar
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ),
@@ -115,7 +128,7 @@ class OnboardingPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 32), // Agak lebih besar
             ],
           ),
         ),

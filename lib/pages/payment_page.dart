@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/services.dart'; // Import untuk Clipboard
-import 'package:qr_flutter/qr_flutter.dart'; // Import untuk QRIS
-import 'receipt.dart'; // Import ReceiptPage
+import 'package:flutter/services.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'receipt.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaymentPage extends StatelessWidget {
   final String namaTiket;
@@ -20,8 +21,18 @@ class PaymentPage extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final Map<int, String> monthNames = {
-      1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'Mei', 6: 'Jun',
-      7: 'Jul', 8: 'Agu', 9: 'Sep', 10: 'Okt', 11: 'Nov', 12: 'Des',
+      1: 'Jan',
+      2: 'Feb',
+      3: 'Mar',
+      4: 'Apr',
+      5: 'Mei',
+      6: 'Jun',
+      7: 'Jul',
+      8: 'Agu',
+      9: 'Sep',
+      10: 'Okt',
+      11: 'Nov',
+      12: 'Des',
     };
     return '${date.day} ${monthNames[date.month]} ${date.year}';
   }
@@ -30,13 +41,34 @@ class PaymentPage extends StatelessWidget {
     return 'Rp ${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 
+  Future<void> _savePurchaseToFirestore() async {
+    try {
+      await FirebaseFirestore.instance.collection('purchase').add({
+        'nama_tiket': namaTiket,
+        'kategori': kategori,
+        'harga': harga,
+        'tanggal': tanggalPembelian,
+        'created_at': FieldValue.serverTimestamp(),
+      });
+      // Debug log
+      print('Data berhasil disimpan ke Firestore');
+    } catch (e) {
+      print('Gagal menyimpan ke Firestore: $e');
+      // Bisa juga tampilkan snackbar jika mau
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8FA),
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.black,
+            size: 20,
+          ), // Icon lebih kecil
           onPressed: () {
             Navigator.pop(context);
           },
@@ -46,7 +78,7 @@ class PaymentPage extends StatelessWidget {
           style: GoogleFonts.poppins(
             color: Colors.black,
             fontWeight: FontWeight.w600,
-            fontSize: 18,
+            fontSize: 15, // Lebih kecil
             height: 1,
             letterSpacing: -0.95,
           ),
@@ -56,22 +88,25 @@ class PaymentPage extends StatelessWidget {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 14.0,
+          vertical: 14.0,
+        ), // Lebih kecil
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Card Total Tagihan
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(14), // Lebih kecil
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(10), // Lebih kecil
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.05),
                     spreadRadius: 0,
-                    blurRadius: 10,
+                    blurRadius: 6, // Lebih kecil
                     offset: const Offset(0, 4),
                   ),
                 ],
@@ -83,37 +118,37 @@ class PaymentPage extends StatelessWidget {
                     children: [
                       // Icon Total Tagihan
                       Container(
-                        width: 48,
-                        height: 48,
+                        width: 36,
+                        height: 36,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF0F5FF),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(8), // Lebih kecil
                         ),
                         child: const Center(
                           child: Icon(
                             Icons.receipt_long,
                             color: Color(0xFF3468E7),
-                            size: 24,
+                            size: 18, // Lebih kecil
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 10),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Total Tagihan',
                             style: GoogleFonts.poppins(
-                              fontSize: 14,
+                              fontSize: 11, // Lebih kecil
                               fontWeight: FontWeight.w500,
                               color: const Color(0xFF6B7280),
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           Text(
                             _formatCurrency(harga),
                             style: GoogleFonts.poppins(
-                              fontSize: 24,
+                              fontSize: 18, // Lebih kecil
                               fontWeight: FontWeight.w700,
                               color: Colors.black,
                             ),
@@ -122,7 +157,7 @@ class PaymentPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -130,7 +165,7 @@ class PaymentPage extends StatelessWidget {
                       Text(
                         'Nama Pesanan',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 11, // Lebih kecil
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF6B7280),
                         ),
@@ -138,21 +173,21 @@ class PaymentPage extends StatelessWidget {
                       Text(
                         '$namaTiket - $kategori',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 11, // Lebih kecil
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'Tanggal',
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 11, // Lebih kecil
                           fontWeight: FontWeight.w500,
                           color: const Color(0xFF6B7280),
                         ),
@@ -160,7 +195,7 @@ class PaymentPage extends StatelessWidget {
                       Text(
                         _formatDate(tanggalPembelian),
                         style: GoogleFonts.poppins(
-                          fontSize: 14,
+                          fontSize: 11, // Lebih kecil
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
@@ -170,18 +205,18 @@ class PaymentPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 14),
 
             // Pilih Metode Pembayaran Section
             Text(
               'Pilih Metode Pembayaran',
               style: GoogleFonts.poppins(
-                fontSize: 16,
+                fontSize: 13, // Lebih kecil
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
 
             // Metode Pembayaran Options
             _buildPaymentOption(
@@ -192,8 +227,10 @@ class PaymentPage extends StatelessWidget {
               onTap: () {
                 _showCashPaymentDialog(context);
               },
+              fontSize: 13, // Tambahkan parameter fontSize
+              iconSize: 20,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _buildPaymentOption(
               context: context,
               title: 'Kartu Kredit',
@@ -202,8 +239,10 @@ class PaymentPage extends StatelessWidget {
               onTap: () {
                 _showCreditCardPaymentDialog(context);
               },
+              fontSize: 13,
+              iconSize: 20,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             _buildPaymentOption(
               context: context,
               title: 'QRIS / QR Pay',
@@ -212,49 +251,59 @@ class PaymentPage extends StatelessWidget {
               onTap: () {
                 _showQrisPaymentPopup(context);
               },
+              fontSize: 13,
+              iconSize: 20,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 14),
 
             // Punya Pertanyaan? Section
             Text(
               'Punya pertanyaan?',
               style: GoogleFonts.poppins(
-                fontSize: 14,
+                fontSize: 11, // Lebih kecil
                 fontWeight: FontWeight.w500,
                 color: Colors.grey.shade700,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10), // Lebih kecil
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(10), // Lebih kecil
                 boxShadow: [
                   BoxShadow(
                     color: Colors.grey.withOpacity(0.05),
                     spreadRadius: 0,
-                    blurRadius: 10,
+                    blurRadius: 6,
                     offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.help_outline, color: Color(0xFF3468E7), size: 24),
-                  const SizedBox(width: 12),
+                  const Icon(
+                    Icons.help_outline,
+                    color: Color(0xFF3468E7),
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Hubungi Admin untuk bantuan pembayaran.',
                       style: GoogleFonts.poppins(
-                        fontSize: 14,
+                        fontSize: 11, // Lebih kecil
                         fontWeight: FontWeight.w500,
                         color: Colors.black87,
                       ),
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF6B7280)),
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 13,
+                    color: Color(0xFF6B7280),
+                  ),
                 ],
               ),
             ),
@@ -270,39 +319,48 @@ class PaymentPage extends StatelessWidget {
     required IconData icon,
     required Color iconColor,
     required VoidCallback onTap,
+    double fontSize = 16,
+    double iconSize = 24,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        padding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 12,
+        ), // Lebih kecil
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(10), // Lebih kecil
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.05),
               spreadRadius: 0,
-              blurRadius: 10,
+              blurRadius: 6,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Row(
           children: [
-            Icon(icon, color: iconColor, size: 24),
-            const SizedBox(width: 16),
+            Icon(icon, color: iconColor, size: iconSize),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 title,
                 style: GoogleFonts.poppins(
-                  fontSize: 16,
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
                 ),
               ),
             ),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF6B7280)),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 13,
+              color: Color(0xFF6B7280),
+            ),
           ],
         ),
       ),
@@ -315,12 +373,12 @@ class PaymentPage extends StatelessWidget {
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12), // Lebih kecil
           ),
           backgroundColor: Colors.white,
           child: Container(
-            width: 300,
-            padding: const EdgeInsets.all(24),
+            width: 220, // Lebih kecil
+            padding: const EdgeInsets.all(14), // Lebih kecil
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -331,7 +389,7 @@ class PaymentPage extends StatelessWidget {
                     Text(
                       'Pembayaran Tunai',
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        fontSize: 13, // Lebih kecil
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF3468E7),
                       ),
@@ -340,66 +398,72 @@ class PaymentPage extends StatelessWidget {
                       onTap: () {
                         Navigator.of(dialogContext).pop();
                       },
-                      child: const Icon(Icons.close, color: Colors.grey),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.grey,
+                        size: 18,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 Container(
-                  width: 135 + 32,
-                  height: 135 + 32,
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.1),
                         spreadRadius: 2,
-                        blurRadius: 8,
+                        blurRadius: 6,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   child: Image.asset(
                     'assets/images/tunai.png',
-                    width: 135,
-                    height: 135,
+                    width: 70,
+                    height: 70,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 Text(
                   'Pembayaran Tunai',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 16,
+                    fontSize: 13,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   'Jika pembayaran telah diterima, klik button konfirmasi pembayaran untuk menyelesaikan transaksi',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: 11,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF6B7280),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await _savePurchaseToFirestore();
                     Navigator.of(dialogContext).pop();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ReceiptPage(
-                          namaTiket: namaTiket,
-                          kategori: kategori,
-                          harga: harga,
-                          tanggalPembelian: tanggalPembelian,
-                        ),
+                        builder:
+                            (context) => ReceiptPage(
+                              namaTiket: namaTiket,
+                              kategori: kategori,
+                              harga: harga,
+                              tanggalPembelian: tanggalPembelian,
+                            ),
                       ),
                     );
                   },
@@ -407,14 +471,15 @@ class PaymentPage extends StatelessWidget {
                     backgroundColor: const Color(0xFF3468E7),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    minimumSize: const Size(double.infinity, 48),
+                    minimumSize: const Size(double.infinity, 36), // Lebih kecil
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   child: Text(
                     'Konfirmasi Pembayaran',
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -428,19 +493,21 @@ class PaymentPage extends StatelessWidget {
   }
 
   void _showCreditCardPaymentDialog(BuildContext context) {
-    final TextEditingController cardNumberController = TextEditingController(text: '8810 7766 1234 9876');
+    final TextEditingController cardNumberController = TextEditingController(
+      text: '8810 7766 1234 9876',
+    );
 
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
           ),
           backgroundColor: Colors.white,
           child: Container(
-            width: 300,
-            padding: const EdgeInsets.all(24),
+            width: 220,
+            padding: const EdgeInsets.all(14),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -451,7 +518,7 @@ class PaymentPage extends StatelessWidget {
                     Text(
                       'Pembayaran Kartu Kredit',
                       style: GoogleFonts.poppins(
-                        fontSize: 16,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: const Color(0xFF3468E7),
                       ),
@@ -460,39 +527,46 @@ class PaymentPage extends StatelessWidget {
                       onTap: () {
                         Navigator.of(dialogContext).pop();
                       },
-                      child: const Icon(Icons.close, color: Colors.grey),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.grey,
+                        size: 18,
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 Container(
-                  width: 135 + 32,
-                  height: 135 + 32,
+                  width: 90,
+                  height: 90,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(10),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.1),
                         spreadRadius: 2,
-                        blurRadius: 8,
+                        blurRadius: 6,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                   child: Image.asset(
                     'assets/images/kredit.png',
-                    width: 135,
-                    height: 135,
+                    width: 70,
+                    height: 70,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF0F5FF),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(6),
                     border: Border.all(color: const Color(0xFFD1D5DB)),
                   ),
                   child: Row(
@@ -507,7 +581,7 @@ class PaymentPage extends StatelessWidget {
                             contentPadding: EdgeInsets.zero,
                           ),
                           style: GoogleFonts.poppins(
-                            fontSize: 16,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
@@ -515,15 +589,19 @@ class PaymentPage extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Clipboard.setData(ClipboardData(text: cardNumberController.text));
+                          Clipboard.setData(
+                            ClipboardData(text: cardNumberController.text),
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Nomor Kartu Kredit Disalin!')),
+                            const SnackBar(
+                              content: Text('Nomor Kartu Kredit Disalin!'),
+                            ),
                           );
                         },
                         child: Text(
                           'Salin',
                           style: GoogleFonts.poppins(
-                            fontSize: 14,
+                            fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF3468E7),
                           ),
@@ -532,41 +610,43 @@ class PaymentPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.center,
                   child: Text(
                     'Transfer Pembayaran',
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Text(
                   'Pastikan nominal dan tujuan pembayaran sudah benar sebelum melanjutkan.',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 14,
+                    fontSize: 11,
                     fontWeight: FontWeight.w400,
                     color: const Color(0xFF6B7280),
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
                 ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    await _savePurchaseToFirestore();
                     Navigator.of(dialogContext).pop();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ReceiptPage(
-                          namaTiket: namaTiket,
-                          kategori: kategori,
-                          harga: harga,
-                          tanggalPembelian: tanggalPembelian,
-                        ),
+                        builder:
+                            (context) => ReceiptPage(
+                              namaTiket: namaTiket,
+                              kategori: kategori,
+                              harga: harga,
+                              tanggalPembelian: tanggalPembelian,
+                            ),
                       ),
                     );
                   },
@@ -574,14 +654,15 @@ class PaymentPage extends StatelessWidget {
                     backgroundColor: const Color(0xFF3468E7),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(6),
                     ),
-                    minimumSize: const Size(double.infinity, 48),
+                    minimumSize: const Size(double.infinity, 36),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
                   ),
                   child: Text(
                     'Konfirmasi Pembayaran',
                     style: GoogleFonts.poppins(
-                      fontSize: 16,
+                      fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -600,10 +681,10 @@ class PaymentPage extends StatelessWidget {
       builder: (BuildContext dialogContext) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(8.0),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20.0),
+            padding: const EdgeInsets.all(12.0), // Lebih kecil
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -613,87 +694,100 @@ class PaymentPage extends StatelessWidget {
                     Text(
                       'Pembayaran QRIS',
                       style: GoogleFonts.poppins(
-                        fontSize: 18.0,
+                        fontSize: 13.0,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                       ),
                     ),
                     IconButton(
-                      icon: Icon(Icons.close, color: Colors.grey[600]),
+                      icon: Icon(
+                        Icons.close,
+                        color: Colors.grey[600],
+                        size: 18,
+                      ),
                       onPressed: () {
                         Navigator.of(dialogContext).pop();
                       },
                     ),
                   ],
                 ),
-                SizedBox(height: 20.0),
+                SizedBox(height: 12.0),
                 QrImageView(
                   data: 'https://gopay.co.id/merchant/qris',
                   version: QrVersions.auto,
-                  size: 200.0,
+                  size: 110.0, // Lebih kecil
                   backgroundColor: Colors.white,
                   foregroundColor: Colors.black,
                   errorStateBuilder: (cxt, err) {
                     return Container(
-                      width: 200.0,
-                      height: 200.0,
+                      width: 110.0,
+                      height: 110.0,
                       alignment: Alignment.center,
                       child: Text(
                         'Oops! Gagal memuat QR Code.',
                         textAlign: TextAlign.center,
-                        style: GoogleFonts.poppins(color: Colors.red),
+                        style: GoogleFonts.poppins(
+                          color: Colors.red,
+                          fontSize: 11,
+                        ),
                       ),
                     );
                   },
                 ),
-                SizedBox(height: 20.0),
+                SizedBox(height: 12.0),
                 Text(
                   'Scan QR untuk Membayar',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 16.0,
+                    fontSize: 13.0,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 6.0),
                 Text(
                   'Gunakan aplikasi e-wallet atau mobile banking untuk scan QR di atas dan selesaikan pembayaran',
                   textAlign: TextAlign.center,
                   style: GoogleFonts.poppins(
-                    fontSize: 14.0,
+                    fontSize: 11.0,
                     color: Colors.grey[600],
                   ),
                 ),
-                SizedBox(height: 30.0),
+                SizedBox(height: 16.0),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+                      await _savePurchaseToFirestore();
                       Navigator.of(dialogContext).pop();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReceiptPage(
-                            namaTiket: namaTiket,
-                            kategori: kategori,
-                            harga: harga,
-                            tanggalPembelian: tanggalPembelian,
-                          ),
+                          builder:
+                              (context) => ReceiptPage(
+                                namaTiket: namaTiket,
+                                kategori: kategori,
+                                harga: harga,
+                                tanggalPembelian: tanggalPembelian,
+                              ),
                         ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF3468E7),
                       foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 15.0),
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                        borderRadius: BorderRadius.circular(6.0),
                       ),
+                      minimumSize: const Size(double.infinity, 36),
                     ),
                     child: Text(
                       'Konfirmasi Pembayaran',
-                      style: GoogleFonts.poppins(fontSize: 16.0, fontWeight: FontWeight.w600),
+                      style: GoogleFonts.poppins(
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
